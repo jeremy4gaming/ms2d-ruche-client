@@ -7,7 +7,7 @@ import { interventionTypes } from '../data';
 interface InterventionModalProps {
   alert: Alert;
   onClose: () => void;
-  onAction: (action: 'intervene' | 'ignore' | 'skip') => void;
+  onAction: (action: 'intervene' | 'ignore' | 'skip', actionId?: string) => void;
 }
 
 /**
@@ -32,7 +32,7 @@ export const InterventionModal: React.FC<InterventionModalProps> = ({
   const handleActionSelect = (actionId: string) => {
     console.log('Action sélectionnée:', actionId);
     setShowActionSelection(false);
-    onAction('intervene');
+    onAction('intervene', actionId);
   };
 
   // Récupère les actions possibles pour ce type d'alerte

@@ -1,19 +1,54 @@
 import { Hive, Alert, TimeSeriesData } from '../types';
 
 /**
- * URL de base de l'API - À modifier selon l'environnement
- * Production, développement, etc.
+ * URL de base de l'API
+ * En développement, utilise le proxy configuré dans vite.config.ts
+ * En production, utiliserait l'URL complète du serveur
  */
 const API_BASE_URL = '/api';
+
+// Fonction utilitaire pour gérer les réponses d'API et les erreurs
+const handleResponse = async (response: Response) => {
+  if (!response.ok) {
+    // Tentative de récupération du message d'erreur
+    let errorMessage = `Erreur ${response.status}`;
+    try {
+      const errorData = await response.json();
+      if (errorData && errorData.message) {
+        errorMessage = errorData.message;
+      }
+    } catch (e) {
+      console.warn("Impossible de parser le message d'erreur:", e);
+    }
+    
+    console.error(`Erreur API (${response.status}):`, errorMessage);
+    throw new Error(errorMessage);
+  }
+  
+  // Tenter de parser la réponse JSON
+  try {
+    return await response.json();
+  } catch (e) {
+    console.error("Erreur lors du parsing de la réponse JSON:", e);
+    throw new Error("Format de réponse invalide");
+  }
+};
 
 /**
  * Récupère la liste de toutes les ruches
  * Utilisé sur la page d'accueil pour afficher les cartes de ruches
  */
 export const getHives = async (): Promise<Hive[]> => {
-  const response = await fetch(`${API_BASE_URL}/hives`);
-  if (!response.ok) throw new Error('Erreur lors de la récupération des ruches');
-  return response.json();
+  try {
+    console.log("Appel API: récupération des ruches");
+    const response = await fetch(`${API_BASE_URL}/hives`);
+    const data = await handleResponse(response);
+    console.log("Données ruches reçues:", data);
+    return data;
+  } catch (error) {
+    console.error("Erreur getHives:", error);
+    throw error;
+  }
 };
 
 /**
@@ -22,9 +57,14 @@ export const getHives = async (): Promise<Hive[]> => {
  * @param id Identifiant unique de la ruche
  */
 export const getHive = async (id: string): Promise<Hive> => {
-  const response = await fetch(`${API_BASE_URL}/hives/${id}`);
-  if (!response.ok) throw new Error('Erreur lors de la récupération de la ruche');
-  return response.json();
+  try {
+    console.log(`Appel API: récupération de la ruche ${id}`);
+    const response = await fetch(`${API_BASE_URL}/hives/${id}`);
+    return await handleResponse(response);
+  } catch (error) {
+    console.error(`Erreur getHive(${id}):`, error);
+    throw error;
+  }
 };
 
 /**
@@ -33,12 +73,20 @@ export const getHive = async (id: string): Promise<Hive> => {
  * @param hiveId Optionnel : filtrer les alertes pour une ruche spécifique
  */
 export const getAlerts = async (hiveId?: string): Promise<Alert[]> => {
-  const url = hiveId 
-    ? `${API_BASE_URL}/alerts?hiveId=${hiveId}`
-    : `${API_BASE_URL}/alerts`;
-  const response = await fetch(url);
-  if (!response.ok) throw new Error('Erreur lors de la récupération des alertes');
-  return response.json();
+  try {
+    const url = hiveId 
+      ? `${API_BASE_URL}/alerts?hiveId=${hiveId}`
+      : `${API_BASE_URL}/alerts`;
+    
+    console.log(`Appel API: récupération des alertes${hiveId ? ` pour la ruche ${hiveId}` : ''}`);
+    const response = await fetch(url);
+    const data = await handleResponse(response);
+    console.log("Données alertes reçues:", data);
+    return data;
+  } catch (error) {
+    console.error(`Erreur getAlerts(${hiveId || 'all'}):`, error);
+    throw error;
+  }
 };
 
 /**
@@ -55,8 +103,7 @@ export const getHiveData = async (
   const response = await fetch(
     `${API_BASE_URL}/hives/${hiveId}/data?type=${type}&timeRange=${timeRange}`
   );
-  if (!response.ok) throw new Error('Erreur lors de la récupération des données');
-  return response.json();
+  return handleResponse(response);
 };
 
 /**
@@ -78,5 +125,20 @@ export const createIntervention = async (
     },
     body: JSON.stringify({ hiveId, actionId, alertId }),
   });
-  if (!response.ok) throw new Error('Erreur lors de l\'enregistrement de l\'intervention');
+  return handleResponse(response);
+};
+
+/**
+ * Récupère les prévisions météo pour un emplacement
+ * @param location Nom de l'emplacement
+ */
+export const getWeatherForecast = async (location: string): Promise<any> => {
+  try {
+    console.log(`Appel API: récupération des prévisions météo pour ${location}`);
+    const response = await fetch(`${API_BASE_URL}/weather?location=${encodeURIComponent(location)}`);
+    return await handleResponse(response);
+  } catch (error) {
+    console.error(`Erreur getWeatherForecast(${location}):`, error);
+    throw error;
+  }
 };

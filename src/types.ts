@@ -5,12 +5,19 @@
 export interface Hive {
   id: string;
   name: string;
-  weight: number;       // Poids actuel en kg
-  temperature: number;  // Température interne en °C
-  humidity: number;     // Taux d'humidité en %
-  status: 'good' | 'warning' | 'danger';  // État global de santé
-  creationYear: number; // Année de création de la ruche
-  supers: number;       // Nombre de hausses actuellement installées
+  location: string;
+  imageUrl: string;
+  health: number;
+  currentData: {
+    temperature: number;
+    humidity: number;
+    weight: number;
+  };
+  creationDate: string;  // Date complète de création au format ISO
+  // Propriétés optionnelles pour la compatibilité avec le code existant
+  status?: 'good' | 'warning' | 'danger';
+  creationYear?: number;
+  supers?: number;
 }
 
 /**
@@ -20,10 +27,13 @@ export interface Hive {
 export interface Alert {
   id: string;
   hiveId: string;  // ID de la ruche concernée
-  type: 'weight' | 'temperature' | 'humidity' | 'activity';  // Type de mesure concernée
-  severity: 'info' | 'warning' | 'danger';  // Niveau de gravité
+  type: 'temperature' | 'humidity' | 'weight' | 'activity';  // Type de mesure concernée
+  severity: 'low' | 'medium' | 'high';  // Niveau de gravité
   message: string;  // Message explicatif
-  timestamp: Date;  // Date et heure de détection
+  createdAt: string;  // Date au format ISO
+  resolved: boolean;  // Indique si l'alerte a été résolue
+  // Propriété pour la compatibilité avec le code existant
+  timestamp?: Date;
 }
 
 /**
@@ -51,4 +61,16 @@ export interface InterventionAction {
 export interface InterventionType {
   type: Alert['type'];     // Type d'alerte concerné
   actions: InterventionAction[]; // Liste des actions possibles
+}
+
+/**
+ * Intervention réalisée sur une ruche
+ */
+export interface Intervention {
+  id: string;
+  hiveId: string;      // ID de la ruche concernée
+  actionId: string;    // ID de l'action réalisée
+  alertId: string;     // ID de l'alerte liée
+  timestamp: string;   // Date et heure de l'intervention
+  notes: string;       // Notes complémentaires
 }
