@@ -22,11 +22,16 @@ import { Alert } from '../types';
  * Affiche les informations détaillées, les alertes et les graphiques
  */
 export const HiveDetail: React.FC = () => {
+  // Récupération de l'identifiant de la ruche depuis l'URL
   const { id } = useParams<{ id: string }>();
+  
+  // État pour gérer l'alerte sélectionnée (pour intervention)
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
+  
+  // État pour la période affichée dans les graphiques
   const [timeRange, setTimeRange] = useState<'day' | 'week' | 'month' | 'year'>('week');
 
-  // Récupération des données de la ruche et des alertes
+  // Récupération des données de la ruche et des alertes associées
   const hive = mockHives.find(h => h.id === id);
   const alerts = mockAlerts.filter(a => a.hiveId === id);
 
@@ -44,7 +49,10 @@ export const HiveDetail: React.FC = () => {
     setSelectedAlert(null);
   };
 
-  // Composant pour les graphiques
+  /**
+   * Composant pour les cartes de graphiques
+   * Réutilisé pour les trois mesures (poids, température, humidité)
+   */
   const ChartCard = ({ title, data, dataKey = 'value', unit, color, icon: Icon, alerts = [] }: {
     title: string;
     data: any[];
@@ -55,10 +63,13 @@ export const HiveDetail: React.FC = () => {
     alerts?: Alert[];
   }) => (
     <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+      {/* En-tête avec icône et titre */}
       <div className="flex items-center space-x-3 mb-4">
         <Icon className="w-6 h-6 text-gray-600" />
         <h3 className="text-xl font-semibold">{title}</h3>
       </div>
+      
+      {/* Graphique */}
       <div className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data}>
@@ -77,6 +88,8 @@ export const HiveDetail: React.FC = () => {
               labelFormatter={(label) => new Date(label).toLocaleDateString()}
             />
             <Legend />
+            
+            {/* Ligne principale du graphique */}
             <Line
               type="monotone"
               dataKey={dataKey}
@@ -85,7 +98,8 @@ export const HiveDetail: React.FC = () => {
               dot={false}
               name={title}
             />
-            {/* Points pour les alertes */}
+            
+            {/* Points pour marquer les alertes sur le graphique */}
             {alerts.map((alert, index) => (
               <Line
                 key={alert.id}
@@ -111,7 +125,7 @@ export const HiveDetail: React.FC = () => {
     </div>
   );
 
-  // Filtrer les alertes par type pour les graphiques
+  // Filtrer les alertes par type pour les associer aux bons graphiques
   const weightAlerts = alerts.filter(a => a.type === 'weight');
   const temperatureAlerts = alerts.filter(a => a.type === 'temperature');
   const humidityAlerts = alerts.filter(a => a.type === 'humidity');
@@ -119,6 +133,7 @@ export const HiveDetail: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
+        {/* Lien de retour */}
         <div className="mb-8">
           <a href="/" className="flex items-center text-gray-600 hover:text-gray-900">
             <ArrowLeft className="w-5 h-5 mr-2" />
@@ -126,7 +141,7 @@ export const HiveDetail: React.FC = () => {
           </a>
         </div>
 
-        {/* En-tête avec informations de la ruche */}
+        {/* En-tête avec informations de la ruche et QR code */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
           <div className="flex justify-between items-start">
             <div className="flex items-center space-x-4">
@@ -154,7 +169,7 @@ export const HiveDetail: React.FC = () => {
           </div>
         </div>
 
-        {/* Section des alertes */}
+        {/* Section des alertes actives */}
         {alerts.length > 0 && (
           <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
             <div className="flex items-center space-x-2 mb-4">
@@ -173,7 +188,7 @@ export const HiveDetail: React.FC = () => {
           </div>
         )}
 
-        {/* Sélection de la période */}
+        {/* Sélection de la période pour les graphiques */}
         <div className="mb-6">
           <div className="flex justify-end space-x-2 mb-4">
             {(['day', 'week', 'month', 'year'] as const).map(range => (
@@ -193,7 +208,7 @@ export const HiveDetail: React.FC = () => {
             ))}
           </div>
 
-          {/* Graphiques */}
+          {/* Graphiques pour chaque type de mesure */}
           <ChartCard
             title="Poids"
             data={weightData}
@@ -222,7 +237,7 @@ export const HiveDetail: React.FC = () => {
           />
         </div>
 
-        {/* Bouton d'intervention */}
+        {/* Bouton flottant pour déclencher une intervention */}
         <div className="fixed bottom-6 right-6">
           <button 
             onClick={() => setSelectedAlert(alerts[0] || null)}
@@ -232,7 +247,7 @@ export const HiveDetail: React.FC = () => {
           </button>
         </div>
 
-        {/* Modal d'intervention */}
+        {/* Modal d'intervention (apparaît uniquement quand une alerte est sélectionnée) */}
         {selectedAlert && (
           <InterventionModal
             alert={selectedAlert}

@@ -1,5 +1,9 @@
 import { Hive, Alert, TimeSeriesData, InterventionType } from './types';
 
+/**
+ * Données fictives de ruches pour le développement et les tests
+ * Chaque ruche a un statut différent pour montrer les différents états possibles
+ */
 export const mockHives: Hive[] = [
   {
     id: '1',
@@ -63,6 +67,10 @@ export const mockHives: Hive[] = [
   }
 ];
 
+/**
+ * Alertes fictives associées aux ruches pour simuler
+ * différentes situations problématiques
+ */
 export const mockAlerts: Alert[] = [
   {
     id: '1',
@@ -90,6 +98,10 @@ export const mockAlerts: Alert[] = [
   }
 ];
 
+/**
+ * Types d'interventions possibles classées par type d'alerte
+ * Chaque type d'alerte propose différentes actions correctives
+ */
 export const interventionTypes: InterventionType[] = [
   {
     type: 'weight',
@@ -150,10 +162,18 @@ export const interventionTypes: InterventionType[] = [
   }
 ];
 
+/**
+ * Génère des données temporelles fictives pour les graphiques
+ * 
+ * @param days - Nombre de jours de données à générer
+ * @param type - Type de donnée à générer (poids, température, humidité)
+ * @returns Un tableau de données avec horodatage et valeur
+ */
 export const generateTimeSeriesData = (days: number, type: 'weight' | 'temperature' | 'humidity'): TimeSeriesData[] => {
   const data = [];
   const now = new Date();
   
+  // Définition des plages de valeurs réalistes pour chaque type de mesure
   const ranges = {
     weight: { min: 20, max: 35 },
     temperature: { min: 30, max: 40 },

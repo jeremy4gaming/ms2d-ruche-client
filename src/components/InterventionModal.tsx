@@ -10,27 +10,37 @@ interface InterventionModalProps {
   onAction: (action: 'intervene' | 'ignore' | 'skip') => void;
 }
 
+/**
+ * Modal permettant à l'apiculteur de gérer une alerte
+ * Propose trois options: intervenir, ignorer ou reporter
+ * Si "intervenir" est choisi, ouvre un second modal pour choisir l'action spécifique
+ */
 export const InterventionModal: React.FC<InterventionModalProps> = ({
   alert,
   onClose,
   onAction
 }) => {
+  // État pour gérer l'affichage du modal de sélection d'action
   const [showActionSelection, setShowActionSelection] = useState(false);
 
+  // Gère le choix d'intervention
   const handleIntervene = () => {
     setShowActionSelection(true);
   };
 
+  // Gère la sélection d'une action spécifique
   const handleActionSelect = (actionId: string) => {
     console.log('Action sélectionnée:', actionId);
     setShowActionSelection(false);
     onAction('intervene');
   };
 
+  // Récupère les actions possibles pour ce type d'alerte
   const interventionType = interventionTypes.find(type => type.type === alert.type);
 
   return (
     <>
+      {/* Premier modal: choix principal */}
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
           <div className="flex justify-between items-center mb-4">
@@ -42,6 +52,7 @@ export const InterventionModal: React.FC<InterventionModalProps> = ({
 
           <p className="mb-6 text-gray-600">{alert.message}</p>
 
+          {/* Boutons d'action */}
           <div className="grid grid-cols-1 gap-3">
             <button
               onClick={handleIntervene}
@@ -65,6 +76,7 @@ export const InterventionModal: React.FC<InterventionModalProps> = ({
         </div>
       </div>
 
+      {/* Second modal: sélection d'action spécifique si nécessaire */}
       {showActionSelection && interventionType && (
         <ActionSelectionModal
           actions={interventionType.actions}

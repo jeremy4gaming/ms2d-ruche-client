@@ -7,18 +7,30 @@ interface AlertBadgeProps {
   onClick?: () => void;
 }
 
+/**
+ * Couleurs associées aux différents niveaux de sévérité
+ * Définit l'apparence visuelle du badge
+ */
 const severityColors = {
   info: 'bg-blue-100 text-blue-800',
   warning: 'bg-yellow-100 text-yellow-800',
   danger: 'bg-red-100 text-red-800'
 };
 
+/**
+ * Icônes associées aux différents niveaux de sévérité
+ */
 const severityIcons = {
   info: Info,
   warning: AlertTriangle,
   danger: AlertTriangle
 };
 
+/**
+ * Badge d'alerte utilisé pour afficher les notifications
+ * Couleur et icône varient selon la sévérité
+ * Peut être cliquable pour ouvrir le détail de l'alerte
+ */
 export const AlertBadge: React.FC<AlertBadgeProps> = ({ alert, onClick }) => {
   const Icon = severityIcons[alert.severity];
 
