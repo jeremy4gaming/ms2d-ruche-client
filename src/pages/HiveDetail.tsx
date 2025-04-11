@@ -403,22 +403,24 @@ export const HiveDetail: React.FC = () => {
   const humidityAlerts = alerts.filter(a => a.type === 'humidity');
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
       <div className="max-w-7xl mx-auto">
         {/* Lien de retour */}
-        <div className="mb-8">
+        <div className="mb-6">
           <a href="/" className="flex items-center text-gray-600 hover:text-gray-900">
             <ArrowLeft className="w-5 h-5 mr-2" />
-            Retour aux ruches
+            <span>Retour aux ruches</span>
           </a>
         </div>
 
-        {/* En-tête avec informations de la ruche et QR code - Conserver les infos mais supprimer le titre principal */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-          <div className="flex justify-between items-start">
-            <div className="flex items-center space-x-4">
+        {/* En-tête avec informations de la ruche et QR code - Responsive */}
+        <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-6">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start">
+            <div className="flex items-center space-x-4 mb-4 sm:mb-0">
               <HiveIcon className="w-12 h-12 text-amber-600" />
               <div>
+                {/* Nom de la ruche ajouté ici */}
+                <h2 className="text-xl font-bold text-gray-800 mb-1">{hive.name}</h2>
                 <div className="text-xs text-gray-500 mb-2">
                   ID: {hive.id}
                 </div>
@@ -442,30 +444,33 @@ export const HiveDetail: React.FC = () => {
               </div>
             </div>
             
-            {/* Image de la ruche si disponible */}
-            {hive.imageUrl && (
-              <div className="hidden md:block max-w-[200px] rounded-lg overflow-hidden">
-                <img 
-                  src={hive.imageUrl} 
-                  alt={hive.name}
-                  className="w-full h-auto" 
-                />
-              </div>
-            )}
-            
-            <div className="flex space-x-4">
-              <button
-                onClick={() => window.print()}
-                className="flex items-center space-x-2 bg-gray-100 px-4 py-2 rounded-lg hover:bg-gray-200"
-              >
-                <Printer className="w-5 h-5" />
-                <span>Imprimer QR Code</span>
-              </button>
-              <div className="w-24 h-24">
-                <QRCodeSVG
-                  value={hive.id}
-                  size={96}
-                />
+            {/* Image et QR code côte à côte sur desktop, empilés sur mobile */}
+            <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+              {/* Image de la ruche si disponible */}
+              {hive.imageUrl && (
+                <div className="max-w-[200px] rounded-lg overflow-hidden">
+                  <img 
+                    src={hive.imageUrl} 
+                    alt={hive.name}
+                    className="w-full h-auto" 
+                  />
+                </div>
+              )}
+              
+              <div className="flex sm:flex-col space-x-4 sm:space-x-0 sm:space-y-4">
+                <button
+                  onClick={() => window.print()}
+                  className="flex items-center space-x-2 bg-gray-100 px-3 py-2 sm:px-4 sm:py-2 rounded-lg hover:bg-gray-200 text-sm"
+                >
+                  <Printer className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="hidden sm:inline">Imprimer QR Code</span>
+                </button>
+                <div className="w-16 h-16 sm:w-24 sm:h-24">
+                  <QRCodeSVG
+                    value={hive.id}
+                    size={96}
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -511,7 +516,7 @@ export const HiveDetail: React.FC = () => {
 
         {/* Sélection de la période pour les graphiques */}
         <div className="mb-6">
-          <div className="flex justify-between items-center space-x-2 mb-4">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-4 sm:space-y-0 sm:space-x-2 mb-4">
             {/* Gauche: Bouton d'exportation des données */}
             {hive && (
               <ExportDataButton 
@@ -525,13 +530,13 @@ export const HiveDetail: React.FC = () => {
               />
             )}
           
-            {/* Droite: Sélection de la période */}
-            <div className="flex space-x-2">
+            {/* Droite: Sélection de la période - scroll horizontal sur mobile */}
+            <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide">
               {(['day', 'week', 'month', 'year'] as const).map(range => (
                 <button
                   key={range}
                   onClick={() => setTimeRange(range)}
-                  className={`px-3 py-1 rounded-lg ${
+                  className={`px-3 py-1 rounded-lg whitespace-nowrap ${
                     timeRange === range
                       ? 'bg-blue-600 text-white'
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -575,16 +580,16 @@ export const HiveDetail: React.FC = () => {
         </div>
 
         {/* Bouton flottant pour déclencher une intervention */}
-        <div className="fixed bottom-6 right-6">
+        <div className="fixed bottom-6 right-6 z-20">
           <button 
             onClick={() => {
-              // Toujours ouvrir le modal d'intervention sans tenir compte des alertes
-              setSelectedAlert(null); // Pas d'alerte sélectionnée
-              setShowInterventionModal(true); // Toujours ouvrir le modal sans alerte
+              setSelectedAlert(null);
+              setShowInterventionModal(true);
             }}
-            className="bg-blue-600 text-white px-6 py-3 rounded-full shadow-lg hover:bg-blue-700 transition-colors"
+            className="bg-blue-600 text-white p-3 sm:px-6 sm:py-3 rounded-full shadow-lg hover:bg-blue-700 transition-colors flex items-center justify-center"
           >
-            Déclencher une intervention
+            <span className="hidden sm:inline mr-2">Déclencher une intervention</span>
+            <span className="sm:hidden">+</span>
           </button>
         </div>
 

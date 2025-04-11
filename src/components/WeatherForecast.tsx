@@ -91,7 +91,7 @@ export const WeatherForecast: React.FC<WeatherForecastProps> = ({ location }) =>
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl shadow-sm p-4 mb-6 text-center">
+      <div className="bg-white rounded-xl shadow-sm p-3 sm:p-4 mb-4 sm:mb-6 text-center">
         <p className="text-gray-500">Chargement des prévisions météo...</p>
       </div>
     );
@@ -99,29 +99,32 @@ export const WeatherForecast: React.FC<WeatherForecastProps> = ({ location }) =>
 
   if (error) {
     return (
-      <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
+      <div className="bg-white rounded-xl shadow-sm p-3 sm:p-4 mb-4 sm:mb-6">
         <p className="text-red-500 text-sm">{error}</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
-      <div className="flex items-center mb-3">
-        <h3 className="text-lg font-medium">Météo à {location}</h3>
+    <div className="bg-white rounded-xl shadow-sm p-3 sm:p-4 mb-4 sm:mb-6">
+      <div className="flex items-center mb-2 sm:mb-3">
+        <h3 className="text-base sm:text-lg font-medium">Météo à {location}</h3>
       </div>
-      <div className="grid grid-cols-7 gap-1">
+      <div className="grid grid-cols-4 sm:grid-cols-7 gap-1 overflow-x-auto pb-1">
         {forecast.map((day, index) => {
+          // Sur mobile, afficher seulement les 4 premiers jours
+          if (index > 3 && window.innerWidth < 640) return null;
+          
           const WeatherIcon = weatherIcons[day.condition];
           const colorClass = weatherColors[day.condition];
           
           return (
             <div key={index} className="text-center">
-              <div className="text-sm font-medium">{day.date}</div>
-              <div className={`flex justify-center my-2 ${colorClass}`}>
-                <WeatherIcon className="w-6 h-6" />
+              <div className="text-xs sm:text-sm font-medium">{day.date}</div>
+              <div className={`flex justify-center my-1 sm:my-2 ${colorClass}`}>
+                <WeatherIcon className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
-              <div className="text-sm font-bold">{day.temperature}°C</div>
+              <div className="text-xs sm:text-sm font-bold">{day.temperature}°C</div>
               <div className="text-xs text-gray-500">{day.precipitationChance}% 💧</div>
             </div>
           );

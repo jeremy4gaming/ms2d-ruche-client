@@ -1,10 +1,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Archive as HiveIcon, Thermometer, Droplets, Scale, MapPin, Calendar } from 'lucide-react';
-import { Hive } from '../types';
+import { Archive as HiveIcon, Thermometer, Droplets, Scale, MapPin, Calendar, AlertTriangle } from 'lucide-react';
+import { Hive, Alert } from '../types';
 
 interface HiveCardProps {
   hive: Hive;
+  alerts: Alert[];
 }
 
 /**
@@ -22,7 +23,7 @@ const statusColors = {
  * Affiche les informations essentielles
  * Cliquable pour accéder à la page de détail
  */
-export const HiveCard: React.FC<HiveCardProps> = ({ hive }) => {
+export const HiveCard: React.FC<HiveCardProps> = ({ hive, alerts }) => {
   const navigate = useNavigate();
 
   // Vérification que toutes les propriétés nécessaires sont présentes
@@ -66,13 +67,13 @@ export const HiveCard: React.FC<HiveCardProps> = ({ hive }) => {
   return (
     <div
       onClick={() => navigate(`/hive/${id}`)}
-      className="bg-white rounded-xl shadow-lg p-6 cursor-pointer transform transition-transform hover:scale-105"
+      className="bg-white rounded-xl shadow-lg p-4 sm:p-6 cursor-pointer transform transition-transform hover:scale-105"
     >
       {/* En-tête avec nom, image, et indicateur d'état */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-3 sm:mb-4">
         <div className="flex items-center">
-          {/* Image de la ruche en format 50x50 ou icône par défaut */}
-          <div className="w-[50px] h-[50px] rounded-lg overflow-hidden mr-3 flex-shrink-0">
+          {/* Image de la ruche en format adaptatif */}
+          <div className="w-10 h-10 sm:w-[50px] sm:h-[50px] rounded-lg overflow-hidden mr-3 flex-shrink-0">
             {imageUrl ? (
               <img 
                 src={imageUrl} 
@@ -81,45 +82,54 @@ export const HiveCard: React.FC<HiveCardProps> = ({ hive }) => {
               />
             ) : (
               <div className="w-full h-full bg-amber-100 flex items-center justify-center">
-                <HiveIcon className="w-6 h-6 text-amber-600" />
+                <HiveIcon className="w-5 h-5 sm:w-6 sm:h-6 text-amber-600" />
               </div>
             )}
           </div>
-          <div className="flex flex-col">
-            <h3 className="text-lg font-semibold">{name}</h3>
+          <div className="flex flex-col overflow-hidden">
+            <h3 className="text-base sm:text-lg font-semibold truncate">{name}</h3>
             {location && (
-              <div className="flex items-center text-sm text-gray-600">
-                <MapPin className="w-3 h-3 mr-1" />
-                <span>{location}</span>
+              <div className="flex items-center text-xs sm:text-sm text-gray-600">
+                <MapPin className="w-3 h-3 mr-1 flex-shrink-0" />
+                <span className="truncate">{location}</span>
               </div>
             )}
           </div>
         </div>
         {/* Indicateur visuel d'état (vert, jaune, rouge) */}
         <div className="flex items-center">
-          <div className={`w-3 h-3 rounded-full ${statusColors[status] || 'bg-gray-500'} mr-2`} />
-          <span className="text-sm">{health}%</span>
+          <div className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full ${statusColors[status] || 'bg-gray-500'} mr-1 sm:mr-2`} />
+          <span className="text-xs sm:text-sm">{health}%</span>
         </div>
       </div>
 
-      {/* Grille des mesures principales */}
-      <div className="grid grid-cols-2 gap-4 mb-4">
-        <div className="flex items-center space-x-2">
-          <Scale className="w-4 h-4 text-gray-600" />
-          <span>{typeof weight === 'number' ? weight.toFixed(1) : '?'} kg</span>
+      {/* Grille des mesures principales - adaptative pour mobile */}
+      <div className="grid grid-cols-2 gap-2 sm:gap-4 mb-2 sm:mb-4">
+        <div className="flex items-center space-x-1 sm:space-x-2">
+          <Scale className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-600" />
+          <span className="text-xs sm:text-sm">{typeof weight === 'number' ? weight.toFixed(1) : '?'} kg</span>
         </div>
-        <div className="flex items-center space-x-2">
-          <Thermometer className="w-4 h-4 text-gray-600" />
-          <span>{typeof temperature === 'number' ? temperature.toFixed(1) : '?'}°C</span>
+        <div className="flex items-center space-x-1 sm:space-x-2">
+          <Thermometer className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-600" />
+          <span className="text-xs sm:text-sm">{typeof temperature === 'number' ? temperature.toFixed(1) : '?'}°C</span>
         </div>
-        <div className="flex items-center space-x-2">
-          <Droplets className="w-4 h-4 text-gray-600" />
-          <span>{typeof humidity === 'number' ? humidity.toFixed(0) : '?'}%</span>
+        <div className="flex items-center space-x-1 sm:space-x-2">
+          <Droplets className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-600" />
+          <span className="text-xs sm:text-sm">{typeof humidity === 'number' ? humidity.toFixed(0) : '?'}%</span>
         </div>
-        <div className="flex items-center space-x-2 text-xs text-gray-600 justify-end">
-          <Calendar className="w-3 h-3 text-gray-500" />
-          <span>Création: {formattedCreationDate}</span>
+        <div className="flex justify-end">
+          {alerts && alerts.length > 0 && (
+            <div className="flex items-center space-x-1 text-xs bg-red-100 text-red-800 px-2 py-0.5 rounded-full">
+              <AlertTriangle className="w-3 h-3" />
+              <span>{alerts.length}</span>
+            </div>
+          )}
         </div>
+      </div>
+      
+      <div className="mt-2 pt-2 border-t border-gray-100 flex items-center space-x-1 justify-end text-xs text-gray-600">
+        <Calendar className="w-3 h-3 text-gray-500" />
+        <span>Création: {formattedCreationDate}</span>
       </div>
     </div>
   );

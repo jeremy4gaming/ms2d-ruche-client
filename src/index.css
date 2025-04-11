@@ -1,3 +1,27 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Masquer les scrollbars mais permettre le scroll */
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari, Opera */
+  }
+}
+
+/* Ajustements pour le mode d'impression */
+@media print {
+  body {
+    background-color: white;
+  }
+  .no-print {
+    display: none;
+  }
+  .print-only {
+    display: block;
+  }
+}

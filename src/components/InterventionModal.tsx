@@ -100,28 +100,28 @@ export const InterventionModal: React.FC<InterventionModalProps> = ({
       {/* Première étape: Modal principal avec les options (seulement si pas en mode direct) */}
       {showInitialModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-semibold">
+          <div className="bg-white rounded-lg p-4 sm:p-6 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-3 sm:mb-4">
+              <h3 className="text-lg sm:text-xl font-semibold">
                 {alert ? "Alerte détectée" : "Nouvelle intervention"}
               </h3>
               <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-                <X className="w-6 h-6" />
+                <X className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
             </div>
 
-            {alert && <p className="mb-6 text-gray-600">{alert.message}</p>}
+            {alert && <p className="mb-4 sm:mb-6 text-gray-600">{alert.message}</p>}
             {!alert && (
-              <p className="mb-6 text-gray-600">
+              <p className="mb-4 sm:mb-6 text-gray-600">
                 Enregistrez une nouvelle intervention pour cette ruche.
               </p>
             )}
 
-            {/* Boutons d'action */}
-            <div className="grid grid-cols-1 gap-3">
+            {/* Boutons d'action - empilés sur mobile */}
+            <div className="grid grid-cols-1 gap-2 sm:gap-3">
               <button
                 onClick={handleIntervene}
-                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                className="bg-green-600 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg hover:bg-green-700 transition-colors"
               >
                 ✅ Enregistrer une intervention
               </button>
@@ -131,13 +131,13 @@ export const InterventionModal: React.FC<InterventionModalProps> = ({
                 <>
                   <button
                     onClick={() => onAction('ignore')}
-                    className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+                    className="bg-red-600 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg hover:bg-red-700 transition-colors"
                   >
                     ❌ Ignorer Définitivement
                   </button>
                   <button
                     onClick={() => onAction('skip')}
-                    className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors"
+                    className="bg-gray-200 text-gray-800 px-3 py-2 sm:px-4 sm:py-2 rounded-lg hover:bg-gray-300 transition-colors"
                   >
                     ⏳ Ne rien faire
                   </button>

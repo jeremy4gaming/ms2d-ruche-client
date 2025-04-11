@@ -100,7 +100,7 @@ export const Home: React.FC = () => {
   }, {} as Record<string, Hive[]>);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
       <div className="max-w-7xl mx-auto">
         {/* Suppression du titre en double */}
 
@@ -131,8 +131,8 @@ export const Home: React.FC = () => {
           <div key={location} className="mb-12">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">{location}</h2>
             
-            {/* Grille de ruches */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-6">
+            {/* Grille de ruches - responsive avec breakpoints adaptés */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mb-6">
               {locationHives.map(hive => (
                 <HiveCard 
                   key={hive.id} 
@@ -142,7 +142,7 @@ export const Home: React.FC = () => {
               ))}
             </div>
             
-            {/* Composant de prévisions météo pour cet emplacement - maintenant sous les ruches */}
+            {/* Composant de prévisions météo - adapté au responsive */}
             <WeatherForecast location={location} />
           </div>
         ))}

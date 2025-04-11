@@ -89,11 +89,11 @@ const Settings: React.FC = () => {
   };
   
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
       <div className="max-w-4xl mx-auto">
-        {/* Tabs de navigation */}
-        <div className="mb-6 border-b border-gray-200">
-          <nav className="flex space-x-4 overflow-x-auto">
+        {/* Tabs de navigation - version scrollable sur mobile */}
+        <div className="mb-6 border-b border-gray-200 overflow-x-auto scrollbar-hide">
+          <nav className="flex space-x-4 pb-1">
             <button
               onClick={() => setCurrentTab('general')}
               className={`py-3 px-1 font-medium text-sm border-b-2 whitespace-nowrap ${
@@ -147,9 +147,9 @@ const Settings: React.FC = () => {
           </nav>
         </div>
         
-        {/* Section des paramètres généraux */}
+        {/* Section des paramètres généraux - adaptée pour mobile */}
         {currentTab === 'general' && (
-          <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+          <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-6">
             <h2 className="text-xl font-semibold mb-4">Paramètres généraux</h2>
             
             <div className="space-y-6">
@@ -182,11 +182,11 @@ const Settings: React.FC = () => {
                 </p>
               </div>
               
-              {/* Unités de mesure */}
+              {/* Unités de mesure - optimisé pour mobile */}
               <div className="pt-4 border-t border-gray-100">
                 <h3 className="text-lg font-medium mb-3">Unités de mesure</h3>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   {/* Unité de température */}
                   <div>
                     <label className="flex items-center mb-2 space-x-2 text-gray-700">
@@ -276,7 +276,7 @@ const Settings: React.FC = () => {
         
         {/* Section de gestion de la langue */}
         {currentTab === 'language' && (
-          <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+          <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-6">
             <h2 className="text-xl font-semibold mb-4 flex items-center">
               <Globe className="w-5 h-5 mr-2 text-blue-500" />
               Langue de l'application
@@ -286,7 +286,7 @@ const Settings: React.FC = () => {
               Choisissez la langue dans laquelle vous souhaitez utiliser l'application. Cette option modifiera tous les textes de l'interface.
             </p>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {availableLanguages.map((lang) => (
                 <div key={lang.code} className="relative">
                   <button
@@ -382,7 +382,7 @@ const Settings: React.FC = () => {
         
         {/* Section des seuils d'alertes */}
         {currentTab === 'thresholds' && (
-          <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+          <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-6">
             <h2 className="text-xl font-semibold mb-4 flex items-center">
               <AlertTriangle className="w-5 h-5 mr-2 text-yellow-500" />
               Seuils d'alertes
@@ -391,14 +391,14 @@ const Settings: React.FC = () => {
               Configurez les seuils à partir desquels les alertes seront déclenchées pour chaque type de mesure.
             </p>
             
-            {/* Seuils de température */}
+            {/* Seuils de température - adapté pour mobile */}
             <div className="mb-8">
               <div className="flex items-center mb-4">
                 <Thermometer className="w-5 h-5 text-red-500 mr-2" />
                 <h3 className="text-lg font-medium">Température</h3>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <label htmlFor="temp-low-critical" className="text-sm font-medium text-gray-700">
@@ -841,12 +841,12 @@ const Settings: React.FC = () => {
           </div>
         )}
         
-        {/* Bouton d'enregistrement des paramètres */}
+        {/* Bouton d'enregistrement des paramètres - full width sur mobile */}
         <div className="flex justify-end">
           <button
             onClick={saveSettings}
             disabled={updatingSettings}
-            className={`flex items-center space-x-2 px-6 py-3 rounded-lg text-white ${
+            className={`w-full sm:w-auto flex items-center justify-center space-x-2 px-6 py-3 rounded-lg text-white ${
               updatingSettings ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'
             } transition-colors`}
           >
