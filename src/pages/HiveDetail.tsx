@@ -15,6 +15,7 @@ import { Archive as HiveIcon, AlertTriangle, ArrowLeft, Printer, Scale, Thermome
 import { mockHives, mockAlerts, generateTimeSeriesData } from '../data';
 import { AlertBadge } from '../components/AlertBadge';
 import { InterventionModal } from '../components/InterventionModal';
+import { ExportDataButton } from '../components/ExportDataButton';
 import { Alert, Hive, TimeSeriesData } from '../types';
 import { getHive, getAlerts, getHiveData, createIntervention } from '../api';
 
@@ -41,6 +42,7 @@ export const HiveDetail: React.FC = () => {
   const [humidityData, setHumidityData] = useState<TimeSeriesData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showInterventionModal, setShowInterventionModal] = useState(false);
 
   // Chargement des données depuis l'API au chargement de la page
   useEffect(() => {
@@ -139,21 +141,57 @@ export const HiveDetail: React.FC = () => {
   };
 
   // Gestion des actions sur les alertes
-  const handleAlertAction = async (action: 'intervene' | 'ignore' | 'skip', actionId?: string) => {
-    if (!hive || !selectedAlert) return;
+  const handleAlertAction = async (
+    action: 'intervene' | 'ignore' | 'skip', 
+    formData?: {
+      actionId: string;
+      notes: string;
+      date: string;
+      hiveId: string;
+      alertId?: string;
+      photoFiles?: File[];
+    }
+  ) => {
+    if (!hive) return;
     
-    if (action === 'intervene' && actionId) {
+    if (action === 'intervene' && formData) {
       try {
-        await createIntervention(hive.id, actionId, selectedAlert.id);
+        // Afficher un message de chargement si des photos sont à uploader
+        if (formData.photoFiles && formData.photoFiles.length > 0) {
+          console.log(`Chargement de ${formData.photoFiles.length} photo(s) en cours...`);
+        }
+        
+        // Appel à l'API avec les données complètes du formulaire
+        await createIntervention({
+          hiveId: formData.hiveId,
+          actionId: formData.actionId,
+          alertId: formData.alertId,
+          notes: formData.notes,
+          date: formData.date,
+          photoFiles: formData.photoFiles
+        });
+        
+        // Afficher un message de confirmation
+        alert("Intervention enregistrée avec succès !");
+        
+        // Fermer les modals
+        setSelectedAlert(null);
+        setShowInterventionModal(false);
+        
         // Recharger les alertes après l'intervention
-        const newAlerts = await getAlerts(hive.id);
-        setAlerts(newAlerts);
+        if (id) {
+          const newAlerts = await getAlerts(id);
+          setAlerts(newAlerts);
+        }
       } catch (err) {
         console.error("Erreur lors de l'enregistrement de l'intervention:", err);
+        alert("Erreur lors de l'enregistrement de l'intervention.");
       }
+    } else {
+      // Fermer les modals pour les autres actions
+      setSelectedAlert(null);
+      setShowInterventionModal(false);
     }
-    
-    setSelectedAlert(null);
   };
 
   /**
@@ -213,10 +251,8 @@ export const HiveDetail: React.FC = () => {
           payload.alertSeverity === 'medium' ? '#f59e0b' : '#3b82f6';
         
         return (
-          <g>
-            {/* Cercle principal (point de donnée) */}
+          <svg>
             <circle cx={cx} cy={cy} r={5} fill={alertColor} stroke="white" strokeWidth={2} />
-            {/* Cercle d'effet de pulsation */}
             <circle 
               cx={cx} 
               cy={cy} 
@@ -227,11 +263,10 @@ export const HiveDetail: React.FC = () => {
               opacity={0.6} 
               className="pulse-critical" 
             />
-          </g>
+          </svg>
         );
       }
       
-      // Pour les points normaux (non alertes), ne rien rendre (seule la ligne sera visible)
       return null;
     };
     
@@ -293,7 +328,7 @@ export const HiveDetail: React.FC = () => {
                 dataKey={dataKey}
                 stroke={color}
                 strokeWidth={2}
-                dot={renderDot}
+                dot={(props) => renderDot(props)}
                 activeDot={{ r: 6, fill: color, stroke: 'white', strokeWidth: 2 }}
                 name={title}
                 connectNulls={true}
@@ -378,13 +413,15 @@ export const HiveDetail: React.FC = () => {
           </a>
         </div>
 
-        {/* En-tête avec informations de la ruche et QR code */}
+        {/* En-tête avec informations de la ruche et QR code - Conserver les infos mais supprimer le titre principal */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
           <div className="flex justify-between items-start">
             <div className="flex items-center space-x-4">
               <HiveIcon className="w-12 h-12 text-amber-600" />
               <div>
-                <h1 className="text-3xl font-bold">{hive.name}</h1>
+                <div className="text-xs text-gray-500 mb-2">
+                  ID: {hive.id}
+                </div>
                 {hive.location && (
                   <div className="flex items-center text-gray-600 mb-1">
                     <MapPin className="w-4 h-4 mr-1" />
@@ -465,7 +502,6 @@ export const HiveDetail: React.FC = () => {
                 <AlertBadge
                   key={alert.id}
                   alert={alert}
-                  hiveName={hive.name} // Ajouter le nom de la ruche
                   onClick={() => setSelectedAlert(alert)}
                 />
               ))}
@@ -475,22 +511,38 @@ export const HiveDetail: React.FC = () => {
 
         {/* Sélection de la période pour les graphiques */}
         <div className="mb-6">
-          <div className="flex justify-end space-x-2 mb-4">
-            {(['day', 'week', 'month', 'year'] as const).map(range => (
-              <button
-                key={range}
-                onClick={() => setTimeRange(range)}
-                className={`px-3 py-1 rounded-lg ${
-                  timeRange === range
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                {range === 'day' ? 'Jour' : 
-                 range === 'week' ? 'Semaine' : 
-                 range === 'month' ? 'Mois' : 'Année'}
-              </button>
-            ))}
+          <div className="flex justify-between items-center space-x-2 mb-4">
+            {/* Gauche: Bouton d'exportation des données */}
+            {hive && (
+              <ExportDataButton 
+                hive={hive}
+                timeSeriesData={{
+                  weight: weightData || [],
+                  temperature: temperatureData || [],
+                  humidity: humidityData || []
+                }}
+                timeRange={timeRange}
+              />
+            )}
+          
+            {/* Droite: Sélection de la période */}
+            <div className="flex space-x-2">
+              {(['day', 'week', 'month', 'year'] as const).map(range => (
+                <button
+                  key={range}
+                  onClick={() => setTimeRange(range)}
+                  className={`px-3 py-1 rounded-lg ${
+                    timeRange === range
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  {range === 'day' ? 'Jour' : 
+                  range === 'week' ? 'Semaine' : 
+                  range === 'month' ? 'Mois' : 'Année'}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Graphiques pour chaque type de mesure */}
@@ -526,8 +578,9 @@ export const HiveDetail: React.FC = () => {
         <div className="fixed bottom-6 right-6">
           <button 
             onClick={() => {
-              const activeAlerts = alerts.filter(a => !a.resolved);
-              setSelectedAlert(activeAlerts.length > 0 ? activeAlerts[0] : null);
+              // Toujours ouvrir le modal d'intervention sans tenir compte des alertes
+              setSelectedAlert(null); // Pas d'alerte sélectionnée
+              setShowInterventionModal(true); // Toujours ouvrir le modal sans alerte
             }}
             className="bg-blue-600 text-white px-6 py-3 rounded-full shadow-lg hover:bg-blue-700 transition-colors"
           >
@@ -539,8 +592,19 @@ export const HiveDetail: React.FC = () => {
         {selectedAlert && (
           <InterventionModal
             alert={selectedAlert}
+            hiveId={hive.id}
             onClose={() => setSelectedAlert(null)}
             onAction={handleAlertAction}
+          />
+        )}
+
+        {/* Modal d'intervention sans alerte (apparaît lorsque l'utilisateur clique sur "Déclencher une intervention") */}
+        {showInterventionModal && hive && (
+          <InterventionModal
+            hiveId={hive.id}
+            onClose={() => setShowInterventionModal(false)}
+            onAction={handleAlertAction}
+            directActionSelection={true} // Ouvrir directement la sélection d'action
           />
         )}
       </div>

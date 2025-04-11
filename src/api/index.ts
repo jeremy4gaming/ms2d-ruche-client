@@ -107,25 +107,71 @@ export const getHiveData = async (
 };
 
 /**
+ * Interface pour les données d'intervention envoyées à l'API
+ */
+interface InterventionData {
+  hiveId: string;
+  actionId: string;
+  alertId?: string;
+  notes?: string;
+  date?: string;
+  photoFiles?: File[];
+}
+
+/**
  * Enregistre une nouvelle intervention sur une ruche
  * Appelé quand l'apiculteur réalise une action suite à une alerte
- * @param hiveId Identifiant de la ruche 
- * @param actionId Action réalisée
- * @param alertId Alerte concernée
+ * @param interventionData Données complètes de l'intervention
  */
 export const createIntervention = async (
-  hiveId: string,
-  actionId: string,
-  alertId: string
+  interventionData: InterventionData
 ): Promise<void> => {
-  const response = await fetch(`${API_BASE_URL}/interventions`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ hiveId, actionId, alertId }),
-  });
-  return handleResponse(response);
+  // Si des photos sont présentes, utiliser FormData pour l'upload
+  if (interventionData.photoFiles && interventionData.photoFiles.length > 0) {
+    const formData = new FormData();
+    
+    // Ajouter tous les champs à FormData
+    formData.append('hiveId', interventionData.hiveId);
+    formData.append('actionId', interventionData.actionId);
+    
+    if (interventionData.alertId) {
+      formData.append('alertId', interventionData.alertId);
+    }
+    
+    if (interventionData.notes) {
+      formData.append('notes', interventionData.notes);
+    }
+    
+    if (interventionData.date) {
+      formData.append('date', interventionData.date);
+    }
+    
+    // Ajouter les fichiers photo avec un indice pour les identifier
+    interventionData.photoFiles.forEach((file, index) => {
+      formData.append(`photos[${index}]`, file);
+    });
+    
+    const response = await fetch(`${API_BASE_URL}/interventions`, {
+      method: 'POST',
+      body: formData,
+      // Ne pas définir Content-Type, le navigateur le fera automatiquement avec boundary
+    });
+    
+    return handleResponse(response);
+  } else {
+    // Cas sans photo: utiliser JSON comme avant
+    const { photoFiles, ...dataWithoutPhotos } = interventionData; // Supprimer la propriété photoFiles
+    
+    const response = await fetch(`${API_BASE_URL}/interventions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(dataWithoutPhotos),
+    });
+    
+    return handleResponse(response);
+  }
 };
 
 /**

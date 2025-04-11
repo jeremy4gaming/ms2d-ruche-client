@@ -70,7 +70,9 @@ export interface Intervention {
   id: string;
   hiveId: string;      // ID de la ruche concernée
   actionId: string;    // ID de l'action réalisée
-  alertId: string;     // ID de l'alerte liée
+  alertId?: string;    // ID de l'alerte liée (optionnel pour les interventions préventives)
   timestamp: string;   // Date et heure de l'intervention
   notes: string;       // Notes complémentaires
+  date?: string;       // Date sélectionnée par l'utilisateur (peut être différente de timestamp)
+  photoUrls?: string[];   // URLs des photos liées à l'intervention (plusieurs possible)
 }
